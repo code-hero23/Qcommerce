@@ -25,8 +25,10 @@ from sklearn.preprocessing import label_binarize
 # -------------------------------------------------
 # ReportLab Imports (PDF generation)
 # -------------------------------------------------
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Frame, PageTemplate
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.pagesizes import A4
+
 
 # -------------------------------------------------
 # PowerPoint Imports (PPT generation)  ✅ MISSING
@@ -55,7 +57,7 @@ st.set_page_config(
 st.sidebar.title("📊 Dashboard Menu")
 page = st.sidebar.radio(
     "Navigate",
-    ["Overview", "EDA", "Model Evaluation", "Live Prediction", "Download Report",  "Download Final PPT"]
+    ["Overview", "EDA", "Model Evaluation", "Live Prediction", "Download Report",  "Download Final PPT", "Download IEEE Report"]
 )
 
 # ---------------- LOAD DATA ----------------
@@ -294,4 +296,119 @@ elif page == "Download Final PPT":
                 data=f,
                 file_name="QCommerce_Final_Presentation.pptx",
                 mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
+            )
+elif page == "Download IEEE Report":
+    st.title("📄 Download IEEE Style Report (2-Column)")
+
+    if st.button("Generate IEEE Report PDF"):
+        pdf_path = "reports/output/IEEE_QCommerce_Sentiment_Report.pdf"
+
+        # -------- Document Setup --------
+        doc = SimpleDocTemplate(
+            pdf_path,
+            pagesize=A4,
+            rightMargin=36,
+            leftMargin=36,
+            topMargin=36,
+            bottomMargin=36
+        )
+
+        styles = getSampleStyleSheet()
+        styles.add(ParagraphStyle(
+            name="IEEE_Title",
+            fontSize=14,
+            alignment=1,
+            spaceAfter=12,
+            leading=16,
+            fontName="Helvetica-Bold"
+        ))
+
+        styles.add(ParagraphStyle(
+            name="IEEE_Body",
+            fontSize=9,
+            leading=11,
+            spaceAfter=6
+        ))
+
+        story = []
+
+        # -------- Title --------
+        story.append(Paragraph(
+            "Sentiment Prediction Using Machine Learning for Q-Commerce Reviews",
+            styles["IEEE_Title"]
+        ))
+
+        # -------- Abstract --------
+        story.append(Paragraph("<b>Abstract—</b>", styles["IEEE_Body"]))
+        story.append(Paragraph(
+            "Quick Commerce (Q-Commerce) platforms generate large volumes of customer feedback. "
+            "Manual analysis of this unstructured text is inefficient. This project proposes a "
+            "supervised machine learning approach to classify customer opinions into Positive, "
+            "Neutral, and Negative sentiments. A real-world Q-Commerce survey dataset was manually "
+            "labeled and processed using TF-IDF feature extraction. Logistic Regression was trained "
+            "and evaluated, achieving an accuracy of 90.9%. The system is deployed using a Streamlit "
+            "dashboard for analysis and prediction.",
+            styles["IEEE_Body"]
+        ))
+
+        # -------- Sections --------
+        sections = [
+            ("I. INTRODUCTION",
+             "Q-Commerce platforms generate large amounts of customer feedback related to delivery, "
+             "pricing, and service quality. Automated sentiment analysis helps businesses understand "
+             "customer satisfaction efficiently."),
+
+            ("II. DATASET DESCRIPTION",
+             "The dataset consists of consumer survey responses collected from Q-Commerce users. "
+             "Since sentiment labels were not present, manual labeling was performed."),
+
+            ("III. METHODOLOGY",
+             "Text preprocessing includes lowercase conversion, stopword removal, and normalization. "
+             "TF-IDF vectorization is used for feature extraction, followed by Logistic Regression "
+             "classification."),
+
+            ("IV. EXPLORATORY DATA ANALYSIS",
+             "EDA includes sentiment distribution analysis, text length analysis using boxplots and "
+             "violin plots, and ROC curve visualization."),
+
+            ("V. RESULTS AND EVALUATION",
+             "The model achieved an accuracy of 90.9%. The results indicate effective classification "
+             "of Positive and Neutral sentiments."),
+
+            ("VI. SYSTEM IMPLEMENTATION",
+             "A Streamlit dashboard provides interactive visualization, live prediction, and automated "
+             "report generation."),
+
+            ("VII. CONCLUSION",
+             "The proposed system successfully applies supervised machine learning for sentiment "
+             "analysis in Q-Commerce reviews."),
+
+            ("VIII. FUTURE WORK",
+             "Future enhancements include deep learning models, multilingual support, and real-time "
+             "integration.")
+        ]
+
+        for title, content in sections:
+            story.append(Spacer(1, 6))
+            story.append(Paragraph(f"<b>{title}</b>", styles["IEEE_Body"]))
+            story.append(Paragraph(content, styles["IEEE_Body"]))
+
+        # -------- Two Column Layout --------
+        frame1 = Frame(doc.leftMargin, doc.bottomMargin,
+                       (doc.width / 2) - 6, doc.height, id='col1')
+        frame2 = Frame(doc.leftMargin + (doc.width / 2) + 6, doc.bottomMargin,
+                       (doc.width / 2) - 6, doc.height, id='col2')
+
+        doc.addPageTemplates([
+            PageTemplate(id='TwoCol', frames=[frame1, frame2])
+        ])
+
+        doc.build(story)
+
+        with open(pdf_path, "rb") as f:
+            st.download_button(
+                label="⬇ Download IEEE Report PDF",
+                data=f,
+                file_name="IEEE_QCommerce_Sentiment_Report.pdf",
+                mime="application/pdf"
             )
