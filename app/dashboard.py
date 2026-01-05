@@ -25,7 +25,7 @@ from sklearn.preprocessing import label_binarize
 # -------------------------------------------------
 # ReportLab Imports (PDF generation)
 # -------------------------------------------------
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Frame, PageTemplate
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Frame, PageTemplate
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.pagesizes import A4
 
